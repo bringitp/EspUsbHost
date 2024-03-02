@@ -561,12 +561,24 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
           report.keycode[5] = transfer->data_buffer[7];
 
           usbHost->onKeyboard(report, last_report);
-
           bool shift = (report.modifier & KEYBOARD_MODIFIER_LEFTSHIFT) || (report.modifier & KEYBOARD_MODIFIER_RIGHTSHIFT);
+          char modifiers = 0;
+
+// Set the corresponding bits in modifiers
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_LEFTSHIFT) ? (1 << 0) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_LEFTCTRL) ? (1 << 1) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_LEFTALT) ? (1 << 2) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_LEFTGUI ) ? (1 << 3) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTSHIFT)? (1 << 4) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTCTRL) ? (1 << 5) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTALT) ? (1 << 6) : 0;
+          modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTGUI ) ? (1 << 7) : 0;
+
           for (int i = 0; i < 6; i++) {
-            if (report.keycode[i] != 0 && last_report.keycode[i] == 0) {
+            //if (report.keycode[i] != 0 && last_report.keycode[i] == 0) {
+               if (report.keycode[i] != 0) {
               // Type
-              usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i], shift);
+              usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i],  modifiers);
             }
           }
 
