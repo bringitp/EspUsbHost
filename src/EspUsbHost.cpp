@@ -574,9 +574,18 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTALT) ? (1 << 6) : 0;
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTGUI ) ? (1 << 7) : 0;
 
+         
           for (int i = 0; i < 6; i++) {
-            //if (report.keycode[i] != 0 && last_report.keycode[i] == 0) {
-               if (report.keycode[i] != 0) {
+              // Type
+            if (report.keycode[i] != 0 && last_report.keycode[i] == 0) {
+              usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i],  modifiers);
+            }
+          }
+
+          // 特殊キー送信
+
+          for (int i = 0; i < 1; i++) {
+            if (report.modifier != 0 && last_report.keycode[i] == 0) {
               // Type
               usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i],  modifiers);
             }
