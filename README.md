@@ -44,11 +44,14 @@ void loop() {
 
 class MyEspUsbHost : public EspUsbHost {
   void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier) {
-    if (1) {
-      M5.Display.startWrite();
-      M5.Display.printf("%i %i", keycode, modifier);
-      M5.Display.endWrite();
-    }
+    M5.Display.startWrite();
+    // 以前の内容を上書きするために、同じ幅のスペースで埋める
+    M5.Display.setCursor(0, 0); // カーソルを先頭に移動
+    M5.Display.printf("          "); // 以前の内容と同じ幅のスペース
+    M5.Display.setCursor(0, 0); // カーソルを先頭に移動
+ 
+    M5.Display.printf("%i %i", keycode, modifier);
+    M5.Display.endWrite();
   }
 };
 
@@ -58,10 +61,10 @@ void setup(void) {
   auto cfg = M5.config();
   M5.begin(cfg);
 
-  M5.Display.setTextSize(1);
+  M5.Display.setTextSize(4);
 
   M5.Display.startWrite();
-  M5.Display.print("Get:");
+  M5.Display.print("ON!:");
   M5.Display.endWrite();
 
   usbHost.begin();
@@ -77,6 +80,7 @@ void loop(void) {
   M5.Display.endWrite();
   M5.Display.display();
 }
+
 
 ```
 ## TODO
@@ -96,8 +100,14 @@ void loop(void) {
 ~~- virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier);~~
 - virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t Alt,Shift,Win,Ctrl);
 
+### Appendix
+![20240303_144128113](https://github.com/bringitp/EspUsbHost/assets/141851166/1bab59ca-f9b2-4772-b1e2-0ec7599a4230)
+
+
 ### Mouse
 
 - virtual void onMouse(hid_mouse_report_t report, uint8_t last_buttons);
 - virtual void onMouseButtons(hid_mouse_report_t report, uint8_t last_buttons);
 - virtual void onMouseMove(hid_mouse_report_t report);
+
+
