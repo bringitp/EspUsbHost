@@ -47,7 +47,7 @@ void loop() {
 ### Keyboard
 
 ~~- virtual uint8_t getKeycodeToAscii(uint8_t keycode, uint8_t shift);~~
-- virtual uint8_t getKeycodeToAscii(uint8_t keycode, uint8_t Alt,Shft,Win,Ctrl);
+- virtual uint8_t getKeycodeToAscii(uint8_t keycode, uint8_t Alt,Shift,Win,Ctrl);
 - virtual void onKeyboard(hid_keyboard_report_t report, hid_keyboard_report_t last_report);
 - virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier);
 
