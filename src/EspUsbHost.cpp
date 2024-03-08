@@ -574,22 +574,45 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTALT) ? (1 << 6) : 0;
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTGUI ) ? (1 << 7) : 0;
 
-         
-          for (int i = 0; i < 6; i++) {
-              // Type
-            if (report.keycode[i] != 0 && last_report.keycode[i] == 0) {
-              usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i],  modifiers);
-            }
-          }
 
-          // 特殊キー送信
 
-          for (int i = 0; i < 1; i++) {
-            if (report.modifier != 0 && last_report.keycode[i] == 0) {
-              // Type
-              usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[i], shift), report.keycode[i],  modifiers);
-            }
-          }
+
+// onKeyboardKey メソッド内でフラグをリセットする
+//if (isKeyPressed) {
+//    usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(keyCodePressed, shift), keyCodePressed, modifiers);
+//    isKeyPressed = false; // キーが処理された後にフラグをリセットする
+//}                        report       last report
+///        report       0 0 0 0 0 0     0 0 0 0 0 0
+//  type      a         a 0 0 0 0 0     0 0 0 0 0 0
+//  release   a         0  0 0 0 0 0    a 0 0 0 0 0
+///        report       0 0 0 0 0 0     0 0 0 0 0 0
+//  type a              a 0 0 0 0 0     0 0 0 0 0 0
+//  type a + b          a b 0 0 0 0    a 0 0 0 0 0 
+//  release a           b 0 0 0 0 0     a b 0 0 0 0
+//  release b           0 0 0 0 0 0     b 0 0 0 0 0 
+//  type a              a 0 0 0 0 0     0 0 0 0 0 0
+//  type a + b          a b 0 0 0 0    a 0 0 0 0 0 
+//  type a + b  +c      a b c 0 0 0    a b 0 0 0 0 
+
+
+
+// 配列R が　a 0 0 0 0 0 　　配列Lが    0 0 0 0 0 0　　の時　a を取り出したい　
+// 配列R が　a b 0 0 0 0 　　配列Lが    a 0 0 0 0 0　　の時　b を取り出したい
+// 配列R が　b 0 0 0 0 0　　配列Lが    a b 0 0 0 0　　の時何も取り出したくない　
+// 配列R が　0 0 0 0 0 0　　配列Lが    0 0 0 0 0 0　　の時何も取り出したくない　
+
+    int get_char = 0;
+    if (report.keycode[0] != 0 && last_report.keycode[0] == 0) {
+        get_char = report.keycode[0];
+    } else if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[2] == 0 ) {
+        get_char = report.keycode[1];
+    } else if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[2] != 0 ) {
+        get_char = report.keycode[2]; // ??? 
+    } else {
+
+    }
+    usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(get_char, shift), get_char, modifiers);
+
 
           memcpy(&last_report, &report, sizeof(last_report));
         }
