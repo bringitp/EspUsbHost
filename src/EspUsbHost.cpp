@@ -574,6 +574,7 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTALT) ? (1 << 6) : 0;
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTGUI ) ? (1 << 7) : 0;
 
+<<<<<<< HEAD
 
 
 
@@ -613,6 +614,32 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
     }
     usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(get_char, shift), get_char, modifiers);
 
+=======
+bool modifierPressed = false;
+bool keyCodePressed = false;
+
+// 修飾キーが押されたかどうかをチェック
+for (int i = 0; i < 8; i++) {
+    if (report.modifier & (1 << i)) {
+        modifierPressed = true;
+        break;
+    }
+}
+
+// キーコードが押されたかどうかをチェック
+for (int i = 0; i < 6; i++) {
+    if (report.keycode[i] != 0) {
+        keyCodePressed = true;
+        break;
+    }
+}
+
+//押された場合にのみ onKeyboardKey を呼び出す
+if ( keyCodePressed) {
+    usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[0], shift), report.keycode[0], modifiers);
+}
+
+>>>>>>> 89a823961de80631a3e32ece95d4a0a05a9803c0
 
           memcpy(&last_report, &report, sizeof(last_report));
         }

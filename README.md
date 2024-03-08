@@ -4,6 +4,11 @@ This is a library for using USB Host with ESP32.
 - ESP32-S3-DevKitC
 - M5Stack ATOMS3
 
+## TODO
+- Shift Lock
+- Keyrepeat 
+
+
 ## function
 - USB Keybord
 - USB Mouse
@@ -83,8 +88,6 @@ void loop(void) {
 
 
 ```
-## TODO
-- Shift Lock
 
 ## Virtual function
 
@@ -95,10 +98,10 @@ void loop(void) {
 
 ### Keyboard
 
-- virtual uint8_t getKeycodeToAscii(uint8_t keycode, uint8_t shift);
-- virtual void onKeyboard(hid_keyboard_report_t report, hid_keyboard_report_t last_report);
-~~- virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier);~~
-- virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t Alt,Shift,Win,Ctrl);
+- virtual uint8_t getKeycodeToAscii(uint8_t keycode, uint8_t shift);  
+- virtual void onKeyboard(hid_keyboard_report_t report, hid_keyboard_report_t last_report);  
+~~- virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier);~~  
+- virtual void onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t Alt,Shift,Win,Ctrl);  
 
 ### Appendix
 ![20240303_144128113](https://github.com/bringitp/EspUsbHost/assets/141851166/1bab59ca-f9b2-4772-b1e2-0ec7599a4230)
