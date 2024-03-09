@@ -546,9 +546,16 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
       if (endpoint_data->bInterfaceProtocol == HID_ITF_PROTOCOL_KEYBOARD) {
         static hid_keyboard_report_t last_report = {};
 
+        
+           
         if (transfer->data_buffer[2] == HID_KEY_NUM_LOCK) {
           // HID_KEY_NUM_LOCK TODO!
-        } else if (memcmp(&last_report, transfer->data_buffer, sizeof(last_report))) {
+        } else if
+         (
+           true // repeat !
+          ) 
+
+         {
           // chenge
           hid_keyboard_report_t report = {};
           report.modifier = transfer->data_buffer[0];
@@ -574,9 +581,6 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTALT) ? (1 << 6) : 0;
           modifiers |= (report.modifier & KEYBOARD_MODIFIER_RIGHTGUI ) ? (1 << 7) : 0;
 
-<<<<<<< HEAD
-
-
 
 // onKeyboardKey メソッド内でフラグをリセットする
 //if (isKeyPressed) {
@@ -584,16 +588,18 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
 //    isKeyPressed = false; // キーが処理された後にフラグをリセットする
 //}                        report       last report
 ///        report       0 0 0 0 0 0     0 0 0 0 0 0
-//  type      a         a 0 0 0 0 0     0 0 0 0 0 0
-//  release   a         0  0 0 0 0 0    a 0 0 0 0 0
+//  type      a         a 0 0 0 0 0     0 0 0 0 0 0    ---  TYPE A
+//  release   a         0  0 0 0 0 0    a 0 0 0 0 0   ---  TYPE A
 ///        report       0 0 0 0 0 0     0 0 0 0 0 0
-//  type a              a 0 0 0 0 0     0 0 0 0 0 0
-//  type a + b          a b 0 0 0 0    a 0 0 0 0 0 
-//  release a           b 0 0 0 0 0     a b 0 0 0 0
+//  type a              a 0 0 0 0 0     0 0 0 0 0 0    --- TYPE DOBULE A
+//  type a + b          a b 0 0 0 0    a 0 0 0 0 0    --- TYPE DOBULE A 
+//  release a           b 0 0 0 0 0     a b 0 0 0 0   --- TYPE DOBULE A
 //  release b           0 0 0 0 0 0     b 0 0 0 0 0 
 //  type a              a 0 0 0 0 0     0 0 0 0 0 0
-//  type a + b          a b 0 0 0 0    a 0 0 0 0 0 
+//  type a + b          a b 0 0 0 0    a 0 0 0 0 0     
 //  type a + b  +c      a b c 0 0 0    a b 0 0 0 0 
+
+//  type a + repeat    a 0 0 0 0 0    a 0 0 0 0 0    --- TYPE REPEAT 
 
 
 
@@ -604,42 +610,22 @@ void EspUsbHost::_onReceive(usb_transfer_t *transfer) {
 
     int get_char = 0;
     if (report.keycode[0] != 0 && last_report.keycode[0] == 0) {
-        get_char = report.keycode[0];
-    } else if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[2] == 0 ) {
-        get_char = report.keycode[1];
-    } else if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[2] != 0 ) {
+        get_char = report.keycode[0];  // TYPE A
+    } 
+    if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[1] != 0 && report.keycode[2] == 0 ) {
+        get_char = report.keycode[1];  // TYPE DOBULE A
+    } 
+    //if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[1] == 0  ) {
+    //    get_char = report.keycode[0];  // TYPE REPEAT A
+    //} 
+
+    if (report.keycode[0] != 0 && last_report.keycode[0] != 0 && report.keycode[2] != 0 ) {
         get_char = report.keycode[2]; // ??? 
     } else {
 
     }
     usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(get_char, shift), get_char, modifiers);
 
-=======
-bool modifierPressed = false;
-bool keyCodePressed = false;
-
-// 修飾キーが押されたかどうかをチェック
-for (int i = 0; i < 8; i++) {
-    if (report.modifier & (1 << i)) {
-        modifierPressed = true;
-        break;
-    }
-}
-
-// キーコードが押されたかどうかをチェック
-for (int i = 0; i < 6; i++) {
-    if (report.keycode[i] != 0) {
-        keyCodePressed = true;
-        break;
-    }
-}
-
-//押された場合にのみ onKeyboardKey を呼び出す
-if ( keyCodePressed) {
-    usbHost->onKeyboardKey(usbHost->getKeycodeToAscii(report.keycode[0], shift), report.keycode[0], modifiers);
-}
-
->>>>>>> 89a823961de80631a3e32ece95d4a0a05a9803c0
 
           memcpy(&last_report, &report, sizeof(last_report));
         }
@@ -793,19 +779,20 @@ uint8_t EspUsbHost::getKeycodeToAscii(uint8_t keycode, uint8_t shift) {
   }
 }
 
-void EspUsbHost::onKeyboardKey(uint8_t ascii, uint8_t keycode, uint8_t modifier) {
+void EspUsbHost::onKeyboardKey(hid_keyboard_report_t report, hid_keyboard_report_t last_report) {
+
   if (' ' <= ascii && ascii <= '~') {
     // printable
-    ESP_LOGV("EspUsbHost", "Keyboard Type=0x%02x(%c), keycode=0x%02x, modifier=0x%02x",
-             ascii,
-             ascii,
-             keycode,
-             modifier);
+//    ESP_LOGV("EspUsbHost", "Keyboard Type=0x%02x(%c), keycode=0x%02x, modifier=0x%02x",
+//             ascii,
+//             ascii,
+//             keycode,
+//             modifier);
   } else {
-    ESP_LOGV("EspUsbHost", "Keyboard Type=0x%02x, keycode=0x%02x, modifier=0x%02x",
-             ascii,
-             keycode,
-             modifier);
+  //  ESP_LOGV("EspUsbHost", "Keyboard Type=0x%02x, keycode=0x%02x, modifier=0x%02x",
+  //           ascii,
+   //          keycode,
+   //          modifier);
   }
 }
 
